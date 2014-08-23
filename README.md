@@ -9,7 +9,7 @@ With either approach you will also have all the data frames I created a long the
 
 ******************************
 
-For this data set I begin with the information in the train directory. I subset X_train based on the columns needed (which were specified as the mean/mean() and standard deviation/std() columns. This left me with 68 columns instead of 561. 
+For this data set I begin with the information in the train directory. I subset X_train based on the columns needed (which were specified as the mean/mean() and standard deviation/std() columns. This left me with 66 (68 in the end - including Subject and Activity) columns instead of 561. 
 
 I then applied the activity labels (as opposed to the numbers 1-6) to that subset. To finish this folder I used cbind to join all the bits of data together. 
 
