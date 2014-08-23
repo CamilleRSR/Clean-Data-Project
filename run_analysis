@@ -1,15 +1,18 @@
-setwd("./train")                                #set working directory to train folder
+#set working directory to train folder
+setwd("./train")                                
 
-file_list_train <- list.files(pattern = ".txt") #create a file list with a txt pattern so 
-                                                #it will ignore the Inertial Signals folder
+#create a file list with a txt pattern so it will ignore the Inertial Signals folder
+file_list_train <- list.files(pattern = ".txt") 
+                                                
+#read in X_train.txt
+X_train <- read.table(file_list_train[2])       
 
-X_train <- read.table(file_list_train[2])       #read in X_train.txt
-                                                #get just the necessary columns from X_train
+#get just the necessary columns from X_train
 X_train_subset <- X_train[,c(1:6, 41:46, 81:86, 121:126, 161:166, 201:202, 214:215, 
                              227:228, 240:241, 253:254, 266:271, 345:350, 424:429, 503:504, 
                              516:517, 529:530, 542:543)]
 
-                                                #apply_activity_labels
+#apply_activity_labels
 y_train <- read.table(file_list_train[3])
 y_train[y_train==1] <- "WALKING"
 y_train[y_train==2] <- "WALKING_UPSTAIRS"
@@ -18,11 +21,12 @@ y_train[y_train==4] <- "SITTING"
 y_train[y_train==5] <- "STANDING"
 y_train[y_train==6] <- "LAYING"
 
-                                                #merge subject_train.txt & y_train.txt
+#merge subject_train.txt & y_train.txt
 merged_data_train <- cbind(read.table(file_list_train[1]),y_train)
 merged_data_train <- cbind(merged_data_train, X_train_subset)
 
-setwd("~/Clean Data/CleanDataProject/UCI HAR Dataset") #return to initial working directory
+#return to initial working directory
+setwd("~/Clean Data/CleanDataProject/UCI HAR Dataset") 
 
 #repeat all the above steps for the test folder
 
@@ -66,7 +70,7 @@ colnames(merged_data) <- c("Subject", "Activity", labels_subset[,2])
 merged <- merged_data[with(merged_data, order(merged_data$Subject, merged_data$Activity)),]
 
 #Creates a second, independent tidy data set with the average of each variable for 
-#each activity and each subject. (and supresses all the NA warnings - both of which 
+#each activity and each subject. (and supresses all the NA warnings - all of which 
 #two columns full of NAs that are useless and deleted)
 
 suppressWarnings(results <- aggregate(merged, list(merged$Subject, merged$Activity), FUN = "mean"))
@@ -74,7 +78,8 @@ suppressWarnings(results <- aggregate(merged, list(merged$Subject, merged$Activi
 results$Activity <- NULL
 results$Subject <- NULL
 
-colnames(results) <- c("Subject", "Activity", labels_subset[,2]) #recreating column names
+#recreating column names
+colnames(results) <- c("Subject", "Activity", labels_subset[,2]) 
 
 #ordering the final results for step 5 (and removing row.names for looks)
 final_results <- results[with(results, order(results$Subject, results$Activity)),]
