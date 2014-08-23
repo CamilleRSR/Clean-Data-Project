@@ -1,0 +1,84 @@
+setwd("./train")                                #set working directory to train folder
+
+file_list_train <- list.files(pattern = ".txt") #create a file list with a txt pattern so 
+                                                #it will ignore the Inertial Signals folder
+
+X_train <- read.table(file_list_train[2])       #read in X_train.txt
+                                                #get just the necessary columns from X_train
+X_train_subset <- X_train[,c(1:6, 41:46, 81:86, 121:126, 161:166, 201:202, 214:215, 
+                             227:228, 240:241, 253:254, 266:271, 345:350, 424:429, 503:504, 
+                             516:517, 529:530, 542:543)]
+
+                                                #apply_activity_labels
+y_train <- read.table(file_list_train[3])
+y_train[y_train==1] <- "WALKING"
+y_train[y_train==2] <- "WALKING_UPSTAIRS"
+y_train[y_train==3] <- "WALKING_DOWNSTAIRS"
+y_train[y_train==4] <- "SITTING"
+y_train[y_train==5] <- "STANDING"
+y_train[y_train==6] <- "LAYING"
+
+                                                #merge subject_train.txt & y_train.txt
+merged_data_train <- cbind(read.table(file_list_train[1]),y_train)
+merged_data_train <- cbind(merged_data_train, X_train_subset)
+
+setwd("~/Clean Data/CleanDataProject/UCI HAR Dataset") #return to initial working directory
+
+#repeat all the above steps for the test folder
+
+setwd("./test")
+
+file_list_test <- list.files(pattern = ".txt")
+
+X_test <- read.table(file_list_test[2])
+X_test_subset <- X_test[,c(1:6, 41:46, 81:86, 121:126, 161:166, 201:202, 214:215, 
+                             227:228, 240:241, 253:254, 266:271, 345:350, 424:429, 503:504, 
+                             516:517, 529:530, 542:543)]
+
+y_test <- read.table(file_list_test[3])
+y_test[y_test==1] <- "WALKING"
+y_test[y_test==2] <- "WALKING_UPSTAIRS"
+y_test[y_test==3] <- "WALKING_DOWNSTAIRS"
+y_test[y_test==4] <- "SITTING"
+y_test[y_test==5] <- "STANDING"
+y_test[y_test==6] <- "LAYING"
+
+merged_data_test <- cbind(read.table(file_list_test[1]),y_test)
+merged_data_test <- cbind(merged_data_test, X_test_subset)
+
+setwd("~/Clean Data/CleanDataProject/UCI HAR Dataset")
+
+#join the data from train and test folders
+
+merged_data <- rbind(merged_data_test,merged_data_train)
+
+#use features.txt to create column names for merged_data
+labels <- read.table("features.txt", stringsAsFactors = FALSE)
+labels_subset <- labels[c(1:6, 41:46, 81:86, 121:126, 161:166, 201:202, 214:215, 
+                          227:228, 240:241, 253:254, 266:271, 345:350, 424:429, 503:504, 
+                          516:517, 529:530, 542:543),]
+
+colnames(merged_data) <- c("Subject", "Activity", labels_subset[,2])
+
+#Order the data by Subject and then Activity (this is probably unnecessary at 
+#this point but it was helpful to decided on how I did the next parts)
+
+merged <- merged_data[with(merged_data, order(merged_data$Subject, merged_data$Activity)),]
+
+#Creates a second, independent tidy data set with the average of each variable for 
+#each activity and each subject. (and supresses all the NA warnings - both of which 
+#two columns full of NAs that are useless and deleted)
+
+suppressWarnings(results <- aggregate(merged, list(merged$Subject, merged$Activity), FUN = "mean"))
+
+results$Activity <- NULL
+results$Subject <- NULL
+
+colnames(results) <- c("Subject", "Activity", labels_subset[,2]) #recreating column names
+
+#ordering the final results for step 5 (and removing row.names for looks)
+final_results <- results[with(results, order(results$Subject, results$Activity)),]
+row.names(final_results) <- NULL
+
+#creates a file called results.txt that is the final_results data frame
+write.table(final_results, file = "results.txt", row.names = FALSE)
